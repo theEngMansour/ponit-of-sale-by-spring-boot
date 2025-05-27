@@ -1,20 +1,21 @@
 package com.learn.controller;
 
-import com.learn.entity.UserEntity;
-import com.learn.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.learn.dto.UserDto;
+import com.learn.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 public class UserController {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserService userService;
 
-    @GetMapping(path = "/users")
-    public List<UserEntity> getUsers() {
-        return this.userRepository.getAllByOrderByUserIdDesc();
+    @PostMapping(path = "/users")
+    public Map<String, String> addUser(@RequestBody UserDto userDto) {
+        return userService.addNewUser(userDto);
     }
 }

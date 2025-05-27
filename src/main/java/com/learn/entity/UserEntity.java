@@ -1,6 +1,7 @@
 package com.learn.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.learn.service.impelement.PasswordEncoder;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,4 +38,9 @@ public class UserEntity {
     @OneToMany(mappedBy = "userEntity")
     @JsonManagedReference
     private List<CourseUserEntity> courses;
+
+
+    public void setPassword(String password) {
+        this.password = PasswordEncoder.encodePassword(password);
+    }
 }

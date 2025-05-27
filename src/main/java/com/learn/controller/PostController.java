@@ -1,14 +1,20 @@
 package com.learn.controller;
 
+import com.learn.annotation.CurrentUser;
+import com.learn.dto.PostRequestDto;
+import com.learn.dto.mapper.PostMapper;
 import com.learn.entity.PostEntity;
 import com.learn.repository.PostRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.validation.Valid;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class PostController {
@@ -16,9 +22,28 @@ public class PostController {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private PostMapper postMapper;
+    @Autowired
+    private EntityManager entityManager;
+
+    @PostMapping(path = "/create-post")
+    public PostRequestDto testValidation(@RequestBody @Valid PostRequestDto dto) {
+        return dto;
+    }
+
+    @GetMapping("/me")
+    public String getCurrentUser(@CurrentUser Integer id) {
+
+        System.out.println("Current User: " + id);
+        return "مرحبا ";
+    }
+
     @GetMapping(path = "/posts")
     public List<PostEntity> getPosts(@RequestParam(required = false) String title) {
-        return this.postRepository.findAllByTitle(title);
+        Session session = entityManager.unwrap(Session.class);
+        session.enableFilter("softDeleteFilter");
+        return this.postRepository.findAll();
     }
 
     @GetMapping(path = "/posts-and-description")
@@ -68,5 +93,19 @@ public class PostController {
         return this.postRepository.findAll(
                 Sort.by(Sort.Direction.DESC, "id", "title")
         );
+    }
+
+    @DeleteMapping(path = "/delete-post/{id}")
+    public void deletePost(@PathVariable Integer id) {
+        Optional<PostEntity> post = this.postRepository.findById(id);
+        if (post.isPresent()) {
+            PostEntity postEntity = post.get();
+            postEntity.setDeletedAt(LocalDateTime.now());
+            this.postRepository.save(postEntity);
+        } else {
+            throw new RuntimeException("Post not found with id: " + id);
+        }
+
+
     }
 }
