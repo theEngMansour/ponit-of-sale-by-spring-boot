@@ -9,6 +9,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,9 @@ public class PostController {
     @Autowired
     private EntityManager entityManager;
 
+    @Value(value = "${app.user.url}")
+    private String baseUrl;
+
     @PostMapping(path = "/create-post")
     public PostRequestDto testValidation(@RequestBody @Valid PostRequestDto dto) {
         return dto;
@@ -37,6 +41,11 @@ public class PostController {
 
         System.out.println("Current User: " + id);
         return "مرحبا ";
+    }
+
+    @GetMapping(path = "config-test")
+    public String getCurrentUser() {
+        return this.baseUrl;
     }
 
     @GetMapping(path = "/posts")
